@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chatContainer {
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #chatBox {
+            height: 400px;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .my-message {
+            background-color: #e6f7ff;
+            text-align: right;
+        }
+        .other-message {
+            background-color: #f1f0f0;
+        }
+        #inputContainer {
+            display: flex;
+        }
+        #message {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #sendButton {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        #sendButton:hover {
+            background-color: #0056b3;
+        }
+        .home-chat-icon{
+            position: relative;
+            float: left;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        .home-chat-icon img{
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .home-chat-icon div{
+            float: left;
+            width: 100%;
+            font-size: 1.3em;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+</head>
+<body>
+
+<div id="chatContainer">
+    <div class="home-chat-icon">
+        <a href="/">
+            <img src="/image/server.svg" />
+        </a>
+        <div>Chat Room</div>
+    </div>
+    <div id="chatBox"></div>
+    <div id="inputContainer">
+        <input type="text" id="message" />
+        <button id="sendButton" onclick="sendMessage()">Send</button>
+    </div>
+    <br/>
+    <a href="/users/login">Logout</a>
+</div>
+</body>
+
+<script>
+    var ws;
+    var name;
+
+    function connect() {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.hostname;
+        const wsPort = window.location.port ? `:${window.location.port}` : '';
+        const wsURL = `${wsProtocol}//${wsHost}${wsPort}/websocket`;
+
+        if (ws) {
+            ws.close();  // Ensure any existing connection is closed before opening a new one
+        }
+
+        ws = new WebSocket(wsURL);
+
+        ws.onopen = function() {
+            console.log('WebSocket connection established');
+        };
+
+        ws.onmessage = function(event) {
+            var receivedMessage = event.data;
+            if (receivedMessage.startsWith("MESSAGE: ")) {
+                var parts = receivedMessage.substring(9).split("#");
+                var message = parts[0];
+                var sender = parts[1];
+                addMessageToChatbox(message, sender);
+            }
+        };
+
+        ws.onclose = function(event) {
+            console.log('WebSocket connection closed', event);
+            setTimeout(connect, 1000);  // Attempt to reconnect after 1 second
+        };
+
+        ws.onerror = function(error) {
+            console.log('WebSocket error', error);
+        };
+
+        name = Cookies.get("name");
+        console.log("Name from cookie:", name);
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById('message');
+        var message = messageInput.value;
+        if (message.trim() !== "") {
+            var sendMessage = "SEND: " + message + "#" + name;
+            ws.send(sendMessage);
+            messageInput.value = "";
+            addMessageToChatbox(message, name, true);
+        }
+    }
+
+    function addMessageToChatbox(message, sender, isSender = false) {
+        var chatBox = document.getElementById('chatBox');
+        var messageElement = document.createElement('div');
+        messageElement.className = 'message ' + (isSender || sender === name ? 'my-message' : 'other-message');
+        messageElement.textContent = sender + ": " + message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function loadInitialMessages() {
+        name = Cookies.get("name");
+        fetch('/mychat')
+            .then(response => response.json())
+            .then(messages => {
+                messages.forEach(msg => {
+                    addMessageToChatbox(msg.text, msg.name, msg.name === name);
+                });
+                connect(); // Establish WebSocket connection after loading initial messages
+            })
+            .catch(error => console.error('Error loading initial messages:', error));
+    }
+
+    window.addEventListener('beforeunload', function() {
+        if (ws) {
+            ws.close();
+        }
+    });
+
+    window.onload = loadInitialMessages;
+</script>
+
+</html>
+
+

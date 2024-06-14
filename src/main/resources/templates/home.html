@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/script.js" defer></script>
+</head>
+<body>
+<h1>Socket Server</h1>
+
+<div class="button-container">
+    <button id="shutdownBtn">Shutdown</button>
+    <button id="startBtn">Restart</button>
+    <button id="checkBtn">Check Leader</button>
+    <button id="chatBtn">Chat</button>
+</div>
+<div class="info-server">
+    <p id="server-id">SERVER ID: 1</p>
+    <p id="leader-id">Current Leader ID: 1</p>
+</div>
+<div id="output">
+    <div class="line">CMD...</div>
+</div>
+</body>
+</html>
+
+<script>
+// Hàm kiểm tra xem cookie "name" có tồn tại không
+function checkCookie() {
+  // Lấy giá trị của cookie "name"
+  let username = getCookie("name");
+  
+  // Nếu cookie "name" tồn tại
+  if (username != "") {
+    // Chuyển hướng đến trang /chat
+    window.location.href = "/chat";
+  } else {
+    // Chuyển hướng đến trang /users/login
+    window.location.href = "/users/login";
+  }
+}
+
+// Hàm lấy giá trị của cookie
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+// Gắn sự kiện click vào nút "Chat"
+document.getElementById("chatBtn").addEventListener("click", checkCookie);
+
+</script>
