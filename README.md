@@ -1,5 +1,3 @@
-<img width="489" alt="image" src="https://github.com/user-attachments/assets/bb20e5e5-4c47-40f4-8381-86e27304c4ea">
-
 The project "Building a mutual exclusion application using the Bully algorithm" has successfully implemented a distributed system using Java and Spring Boot to manage and coordinate processes. The application includes a TCP server (TCPServer) and a WebSocket handler (WebSocketHandler) to manage connections and messages from clients.
 
 The TCP server is responsible for listening to connections from clients, managing connections with other servers, and conducting leader elections using the Bully algorithm. When a leader loses connection, the server will restart the election process to ensure there is always a leading process to control activities in the system.
