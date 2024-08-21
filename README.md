@@ -16,10 +16,10 @@ Application Forms:
 
 <img width="353" alt="image" src="https://github.com/user-attachments/assets/200be047-ce5c-49ca-82c8-6f28588a441d">
 
-Shutdown: Disconnect the server.
-Restart: Reconnect the server.
-Check leader: Identify the leader with the largest ID.
-Chat: Represents communication between servers.
+- Shutdown: Disconnect the server.
+- Restart: Reconnect the server.
+- Check leader: Identify the leader with the largest ID.
+- Chat: Represents communication between servers.
 
 
 Specific Functions:
